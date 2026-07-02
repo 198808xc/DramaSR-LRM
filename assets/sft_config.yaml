@@ -1,0 +1,49 @@
+### model
+model_name_or_path: {{sft_init_model_dir}}
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: full
+deepspeed: {{sft_deepspeed_config_file}}
+
+### dataset
+dataset_dir: {{sft_dataset_dir}}
+dataset: {{sft_dataset_name}}
+template: qwen3_nothink
+cutoff_len: 24576
+max_samples: 100000
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 0
+mask_history: true
+
+### output
+output_dir: {{sft_output_dir}}
+logging_steps: 1
+save_steps: 128
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: none
+
+### train
+per_device_train_batch_size: 8
+gradient_accumulation_steps: 4
+learning_rate: {{sft_learning_rate}}
+num_train_epochs: {{sft_num_epochs}}
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+disable_shuffling: false
+bf16: true
+ddp_timeout: 180000000
+resume_from_checkpoint: null
+optim: paged_adamw_8bit
+use_unsloth_gc: true
+enable_liger_kernel: true
+
+### eval
+val_size: {{sft_validation_ratio}}
+per_device_eval_batch_size: 1
+eval_strategy: epoch
