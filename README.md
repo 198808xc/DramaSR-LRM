@@ -83,6 +83,50 @@ Example using `huggingface-cli`:
 huggingface-cli download Qwen/Qwen3-8B --local-dir assets/Qwen3-8B
 ```
 
+## Pre-trained Models
+
+We release two checkpoints trained on Qwen3-8B for speaker recognition in long-form TV dramas:
+
+| Stage | Hugging Face | Local directory |
+|-------|--------------|-----------------|
+| SFT | [`198808xc/DramaSR-LRM`](https://huggingface.co/198808xc/DramaSR-LRM/tree/main/model_sft_20260316_000000) | `pretrained_models/model_sft_20260316_000000/` |
+| RL (GRPO) | [`198808xc/DramaSR-LRM`](https://huggingface.co/198808xc/DramaSR-LRM/tree/main/model_rl_20260328_031702) | `pretrained_models/model_rl_20260328_031702/` |
+
+Both checkpoints are hosted in a single model repo: [198808xc/DramaSR-LRM](https://huggingface.co/198808xc/DramaSR-LRM).
+
+### Download
+
+```bash
+# SFT checkpoint
+hf download 198808xc/DramaSR-LRM model_sft_20260316_000000 \
+  --local-dir pretrained_models/model_sft_20260316_000000
+
+# RL checkpoint
+hf download 198808xc/DramaSR-LRM model_rl_20260328_031702 \
+  --local-dir pretrained_models/model_rl_20260328_031702
+```
+
+### Run inference with the RL checkpoint
+
+The inference stage reads models from `cached_models/` (not `pretrained_models/`). After downloading, set up the expected layout:
+
+```bash
+mkdir -p cached_models/model_rl_20260328_031702/snapshots
+ln -sfn "$(pwd)/pretrained_models/model_rl_20260328_031702" \
+  cached_models/model_rl_20260328_031702/snapshots/global_step_1572
+```
+
+Then in `run.sh`, set:
+
+```bash
+model_inference=1
+TRAINED_MODEL_TIMESTAMP=20260328_031702
+```
+
+Enable only the stages you need (`data_preparation`, `data_curation`, and `model_training` can remain empty) and run `bash run.sh`.
+
+> **Note:** Full pipeline inference expects an `rl_starter.sh` file inside `cached_models/model_rl_20260328_031702/` (generated during RL training). If you only downloaded weights from Hugging Face, copy the `rl_starter.sh` from your RL training output, or re-run the RL training stage to regenerate it.
+
 ## Data
 
 Each drama lives under `drama_data/<drama_name>/` and contains:
@@ -116,6 +160,17 @@ Each drama lives under `drama_data/<drama_name>/` and contains:
 | Empresses in the Palace | `zhen_huan_zhuan` | 76 | Chinese |
 
 Additional dramas (1 Chinese and 3 English) will be released by **July 20, 2026**.
+
+## Pre-trained Models
+
+Model weights are **not** stored in this repository. Download them from Hugging Face (see the [Pre-trained Models](../README.md#pre-trained-models) section in the root README).
+
+| Checkpoint | Local path (after download) |
+|------------|---------------------------|
+| SFT | `pretrained_models/model_sft_20260316_000000/` |
+| RL | `pretrained_models/model_rl_20260328_031702/` |
+
+For pipeline inference, link or copy the RL checkpoint into `cached_models/model_rl_20260328_031702/` (see root README).
 
 ## Quick Start
 
@@ -187,6 +242,11 @@ DramaSR-LRM/
 │   ├── **sft_config.yaml**              # LLaMA-Factory SFT config template (filled at runtime)
 │   ├── **rl_starter.sh**                # verl-tool GRPO training launcher template
 │   └── **ts_starter.sh**                # vLLM multi-GPU inference server launcher template
+│
+├── **pretrained_models/**               # Pre-trained SFT/RL checkpoints (gitignored; download from Hugging Face)
+│   ├── README.md
+│   ├── model_sft_20260316_000000/       # SFT checkpoint
+│   └── model_rl_20260328_031702/        # RL checkpoint (snapshots/global_step_1572/)
 │
 ├── **drama_data/**                      # Per-drama datasets (subtitles, faces, embeddings, captions, …)
 │   └── <drama_name>/
@@ -287,5 +347,5 @@ Bundled third-party code (LLaMA-Factory, verl-tool, verl) retains its original l
 
 | Date | Milestone |
 |------|-----------|
-| **July 4, 2026** | Pre-trained models (SFT and RL checkpoints) |
+| **July 4, 2026** | Pre-trained models (SFT and RL checkpoints) — [available on Hugging Face](#pre-trained-models) |
 | **July 20, 2026** | Remaining dramas (1 Chinese + 3 English) |

@@ -1,0 +1,17 @@
+# Pre-trained model checkpoints (hosted on Hugging Face; too large for Git)
+pretrained_models/model_sft_20260316_000000/
+pretrained_models/model_rl_20260328_031702/
+
+# Runtime model cache used by inference (symlink or copy from downloaded checkpoints)
+cached_models/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter
+.ipynb_checkpoints/
+
+# FlashAttention wheel (download separately; see install.sh)
+flash_attn-*.whl
